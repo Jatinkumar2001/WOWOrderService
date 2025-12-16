@@ -10,7 +10,7 @@ public class OrderItemDTO {
 
 	private Long id;
 	
-    private long productId;
+    private Long variantId;
 
     private UUID orderId;
 

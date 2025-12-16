@@ -9,9 +9,9 @@ public class CartItemsDTO {
 
     private UUID id;
     private UUID cartId;
-    private Long productId;
+    private Long variantId;
     private Integer quantity;
-    private ProductDTO product;
+    private ProductDTO variant;
 
 
 }

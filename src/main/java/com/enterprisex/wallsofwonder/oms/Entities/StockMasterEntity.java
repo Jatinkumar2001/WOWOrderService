@@ -16,7 +16,7 @@ public class StockMasterEntity extends AbstractEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "stock_master_id_seq")
     @SequenceGenerator(name = "stock_master_id_seq", sequenceName = "invt.stock_master_id_seq", allocationSize = 1)
     private Long id;
-    private Long productId;
+    private Long variantId;
     private Integer quantity;
     @Column(name = "blocked_quantity", nullable = false)
     private int blockedQty;

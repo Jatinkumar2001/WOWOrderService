@@ -41,22 +41,23 @@ public class OrderConvertor {
 
     public OrderItemEntity cartItemToOrderItemEntity(CartItemsDTO dto) {
         OrderItemEntity item = new OrderItemEntity();
-        item.setTitle(dto.getProduct().getTitle());
-        item.setShortDescription(dto.getProduct().getShortDescription());
-        item.setSalePrice(dto.getProduct().getSalePrice());
-        item.setPrice(dto.getProduct().getSalePrice());
+        item.setVariantId(dto.getVariantId());
+        item.setTitle(dto.getVariant().getTitle());
+        item.setShortDescription(dto.getVariant().getShortDescription());
+        item.setSalePrice(dto.getVariant().getSalePrice());
+        item.setPrice(dto.getVariant().getSalePrice());
         item.setQuantity(dto.getQuantity());
-        item.setImage(dto.getProduct().getImage());
+        item.setImage(dto.getVariant().getImage());
         item.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         return item;
     }
 
     public OrderItemDTO cartItemToOrderItem(CartItemsDTO dtoObject) {
         OrderItemDTO orderItemDTO = new OrderItemDTO();
-        orderItemDTO.setProductId(dtoObject.getProductId());
-        orderItemDTO.setPrice(dtoObject.getProduct().getSalePrice());
+        orderItemDTO.setVariantId( dtoObject.getVariantId());
+        orderItemDTO.setPrice(dtoObject.getVariant().getSalePrice());
         orderItemDTO.setQuantity(dtoObject.getQuantity());
-        orderItemDTO.setBillingPrice(dtoObject.getProduct().getSalePrice());
+        orderItemDTO.setBillingPrice(dtoObject.getVariant().getSalePrice());
         return orderItemDTO;
     }
 
@@ -68,7 +69,7 @@ public class OrderConvertor {
         plitem.setOrderId(order.getId());
         plitem.setOrderSerialId(order.getUserTrackingId());
         plitem.setOrderItemId(orderItem.getId());
-        plitem.setProductId(orderItem.getProductId());
+        plitem.setVariantId(orderItem.getVariantId());
         plitem.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         return plitem;
     }

@@ -11,6 +11,7 @@ import com.enterprisex.wallsofwonder.oms.Repositories.CartItemRepository;
 import com.enterprisex.wallsofwonder.oms.Repositories.CartRepository;
 import com.enterprisex.wallsofwonder.oms.Service.CartService;
 import com.enterprisex.wallsofwonder.oms.UserContext;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,7 @@ public class CartServiceImp implements CartService {
         return cartItemConverter.entityToDto(cartItemResponse);
     }
 
+    @Transactional
     @Override
     public List<CartItemsDTO> addToCart(CartRequest body) {
         CartEntity cart = cartRepository.findByUserId(UserContext.getUser().getId());
@@ -54,7 +56,7 @@ public class CartServiceImp implements CartService {
             userCart.setIsActive(true);
             cart = cartRepository.save(userCart);
         }
-        CartsItemsEntity cartsItems = cartsItemsRepository.findByProductIdAndCartId(cart.getId(), body.getProductId());
+        CartsItemsEntity cartsItems = cartsItemsRepository.findByVariantIdAndCartId(cart.getId(), body.getVariantId());
 
         CartItemsDTO cartsItemsDTO;
         if (cartsItems == null) {
@@ -72,7 +74,7 @@ public class CartServiceImp implements CartService {
     @Override
     public List<CartItemsDTO> removeQtyCart(CartRequest body) {
         CartEntity cart = cartRepository.findByUserId(UserContext.getUser().getId());
-        CartsItemsEntity cartsItems = cartsItemsRepository.findByProductIdAndCartId(cart.getId(), body.getProductId());
+        CartsItemsEntity cartsItems = cartsItemsRepository.findByVariantIdAndCartId(cart.getId(), body.getVariantId());
         if (cartsItems != null) {
             if (cartsItems.getQuantity() == 1) {
                 cartsItemsRepository.delete(cartsItems);
@@ -89,7 +91,7 @@ public class CartServiceImp implements CartService {
     @Override
     public List<CartItemsDTO> deleteItemCart(CartRequest body) throws Exception {
         CartEntity cart = cartRepository.findByUserId(UserContext.getUser().getId());
-        CartsItemsEntity cartsItems = cartsItemsRepository.findByProductIdAndCartId(cart.getId(), body.getProductId());
+        CartsItemsEntity cartsItems = cartsItemsRepository.findByVariantIdAndCartId(cart.getId(), body.getVariantId());
         if (cartsItems == null) throw new Exception("Item not found");
         cartsItemsRepository.delete(cartsItems);
         return findCartItems();

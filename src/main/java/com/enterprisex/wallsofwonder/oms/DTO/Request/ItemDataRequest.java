@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ItemDataRequest {
     private int quantity;
-    private Long productId;
+    private Long variantId;
 }

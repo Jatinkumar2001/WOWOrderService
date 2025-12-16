@@ -35,8 +35,8 @@ public class OrderItemsPickListEntity extends AbstractEntity implements Serializ
     @Column(name = "user_id")
     private long userId;
     
-    @Column(name = "product_id")
-    private long productId;
+    @Column(name = "variant_id")
+    private long variantId;
 
     @Column(name = "dispatch_id")
     private long dispatchId;

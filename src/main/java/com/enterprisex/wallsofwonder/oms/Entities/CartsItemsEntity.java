@@ -18,7 +18,7 @@ public class CartsItemsEntity extends AbstractEntity implements Serializable {
     @Column(name = "id", columnDefinition = "uuid DEFAULT gen_random_uuid()", updatable = false, nullable = false)
     private UUID id;
     private Integer quantity;
-	private Long productId;
+	private Long variantId;
     private UUID cartId;
 
 

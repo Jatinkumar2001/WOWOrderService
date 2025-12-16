@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Data
 public class OrderDTO {
-    private Long id;
+    private UUID id;
     private String userTrackingId;
     private UUID couponId;
     private Long userId;

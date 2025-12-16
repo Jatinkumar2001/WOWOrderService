@@ -19,8 +19,9 @@ public class CartItemWithProductEntity implements Serializable {
     private UUID cartId;
 //    private Long userId;
     private UUID id;
+    private String name;
     private String title;
-    private Long productId;
+    private Long variantId;
     private Double salePrice;
     private BigInteger maxRetailPrice;
     private String urlKey;
@@ -31,10 +32,10 @@ public class CartItemWithProductEntity implements Serializable {
     private String metaDescription;
     private String metaKeyword;
     private String stockStatus;
-    private boolean active;
-    private boolean isPublished;
+//    private boolean active;
+//    private boolean isPublished;
     private Integer quantity;
-    private BigDecimal discountedPrice;
+//    private BigDecimal discountedPrice;
 //    private Boolean isDiscountShow;
     private String mainCategory;
     private String subCategory;

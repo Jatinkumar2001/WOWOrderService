@@ -113,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
 //            orderItemMeta.setUserTrackingId(orderMeta.getUserTrackingId());
             ItemDataRequest id = new ItemDataRequest();
             id.setQuantity(orderItemMeta.getQuantity());
-            id.setProductId(orderItemMeta.getProductId());
+            id.setVariantId(orderItemMeta.getVariantId());
             orderItems.add(id);
         }
         orderItemRepository.saveAll(order.getOrderItems());
@@ -130,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
         ValidateCartInventoryResponse response = new ValidateCartInventoryResponse();
         List<ValidateCartResponseItemInventory> responseArray = new ArrayList<>();
         for (ValidateCartItemInventoryRequest cartItem : cartData.getCartItems()) {
-            Long inventoryData = stockMasterService.findOmniStock(cartItem.getProductId());
+            Long inventoryData = stockMasterService.findOmniStock(cartItem.getVariantId());
 //            PriceListMaster priceMasterDataForSku = priceListMasterRepo.findBySku(cartItem.getVariantSku());
             ValidationStatus status = ValidationStatus.AVAILABLE;
             if (inventoryData == null)
@@ -145,7 +145,7 @@ public class OrderServiceImpl implements OrderService {
 
             long qty = (inventoryData > cartItem.getQuantity()) ? cartItem.getQuantity() : inventoryData;
             ValidateCartResponseItemInventory cartItemRes = new ValidateCartResponseItemInventory();
-            cartItemRes.setVariantId(cartItem.getProductId());
+            cartItemRes.setVariantId(cartItem.getVariantId());
             cartItemRes.setQuantity(qty);
             cartItemRes.setPrice(cartItem.getPrice());
             cartItemRes.setStatus(status);
@@ -176,9 +176,9 @@ public class OrderServiceImpl implements OrderService {
             OrderDTO response = mapper.map(order, OrderDTO.class);
 
 
-            if (order.getUserTrackingId() != null && response.getPaymentMode() != null) {
+//            if (order.getUserTrackingId() != null && response.getPaymentMode() != null) {
 //            new OrderSmsSender(order, orderMeta.getUserTrackingId(), response.getPaymentMode()).start();
-            }
+//            }
             return response;
         }
         throw new RuntimeException("Order Not Found");
@@ -274,7 +274,7 @@ public class OrderServiceImpl implements OrderService {
         List<ItemDataRequest> stockItems = new ArrayList<>();
         for (OrderItemEntity item : order.getOrderItems()) {
             ItemDataRequest stockItem = new ItemDataRequest();
-            stockItem.setProductId(item.getProductId());
+            stockItem.setVariantId(item.getVariantId());
             stockItem.setQuantity(item.getQuantity());
             stockItems.add(stockItem);
             for (int i = 0; i < item.getQuantity(); i++) {

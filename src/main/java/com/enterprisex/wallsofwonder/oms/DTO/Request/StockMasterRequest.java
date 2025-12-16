@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class StockMasterRequest {
     private Long id;
-    private Long productId;
+    private Long variantId;
     private Integer quantity;
     private String actionType;
 }

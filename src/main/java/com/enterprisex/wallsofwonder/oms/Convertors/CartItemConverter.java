@@ -19,7 +19,7 @@ public class CartItemConverter {
         CartItemsDTO dto = new CartItemsDTO();
         dto.setCartId(items.getCartId());
         dto.setQuantity(items.getQuantity());
-        dto.setProductId(items.getProductId());
+        dto.setVariantId(items.getVariantId());
         dto.setId(items.getId());
         return  dto;
     }
@@ -28,7 +28,7 @@ public class CartItemConverter {
         if (items == null) return null;
         CartItemsDTO dto = new CartItemsDTO();
         dto.setQuantity(items.getQuantity());
-        dto.setProductId(items.getProductId());
+        dto.setVariantId(items.getVariantId());
         return  dto;
     }
 
@@ -38,30 +38,31 @@ public class CartItemConverter {
         CartsItemsEntity dto = new CartsItemsEntity();
         dto.setCartId(items.getCartId());
         dto.setQuantity(items.getQuantity());
-        dto.setProductId(items.getProductId());
+        dto.setVariantId(items.getVariantId());
         dto.setId(items.getId());
         return  dto;
     }
     public CartItemsDTO entityToDto(CartItemWithProductEntity cartItemResponse){
         if (cartItemResponse == null) return  null;
         CartItemsDTO dto  = new CartItemsDTO();
-        dto.setProductId(cartItemResponse.getProductId());
+        dto.setVariantId(cartItemResponse.getVariantId());
         dto.setQuantity(cartItemResponse.getQuantity());
         dto.setCartId(cartItemResponse.getCartId());
         ProductDTO productVariantDto = new ProductDTO();
-        productVariantDto.setActive(cartItemResponse.isActive());
+//        productVariantDto.setActive(cartItemResponse.isActive());
+        productVariantDto.setName(cartItemResponse.getName());
         productVariantDto.setSalePrice(cartItemResponse.getSalePrice());
         productVariantDto.setTitle(cartItemResponse.getTitle());
         productVariantDto.setUrlKey(cartItemResponse.getUrlKey());
         productVariantDto.setStockStatus(cartItemResponse.getStockStatus());
-        productVariantDto.setIsPublished(cartItemResponse.isPublished());
+//        productVariantDto.setIsPublished(cartItemResponse.isPublished());
         productVariantDto.setShortDescription(cartItemResponse.getShortDescription());
         productVariantDto.setFullDescription(cartItemResponse.getFullDescription());
         productVariantDto.setImage(cartItemResponse.getImage());
         productVariantDto.setMetaTitle(cartItemResponse.getMetaTitle());
         productVariantDto.setMetaDescription(cartItemResponse.getMetaDescription());
         productVariantDto.setMetaKeyword(cartItemResponse.getMetaKeyword());
-        dto.setProduct(productVariantDto);
+        dto.setVariant(productVariantDto);
         return dto;
     }
     public List<CartItemsDTO> entityToDto(List<CartItemWithProductEntity> cartItemResponse){

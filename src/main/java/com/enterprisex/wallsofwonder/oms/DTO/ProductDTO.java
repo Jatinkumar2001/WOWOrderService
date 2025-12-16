@@ -9,6 +9,7 @@ public class ProductDTO implements Serializable {
 
     private Long id;
     private Boolean active;
+    private String name;
     private Double maxRetailPrice;
     private Double salePrice;
     private Double discountedPrice;

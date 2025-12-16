@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ValidateCartItemInventoryRequest {
 
-    private long productId;
+    private long variantId;
     private int quantity;
     private double price;
 }

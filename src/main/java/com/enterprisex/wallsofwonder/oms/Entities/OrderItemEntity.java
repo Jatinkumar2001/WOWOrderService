@@ -35,8 +35,8 @@ public class OrderItemEntity extends AbstractEntity implements Serializable{
     @Column(name = "title")
     private String title;
 
-    @Column(name = "product_id")
-    private Long productId;
+    @Column(name = "variant_id")
+    private Long variantId;
 
     @Column(name = "sale_price")
     private Double salePrice;
