@@ -59,7 +59,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             }
             // ✅ Save to ThreadLocal
             UserContext.setUser(validateResponse.getData());
-
+            System.out.println(validateResponse.getData().getPhoneNumber());
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
