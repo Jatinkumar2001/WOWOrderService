@@ -16,9 +16,10 @@ import java.util.stream.Collectors;
 @Service
 public class OrderConvertor {
 
-    public OrderEntity buildOrderEntity(CartItemsRequest orderRequest) {
+    public OrderEntity buildOrderEntity(CartItemsRequest orderRequest,String trackingId) {
 
         OrderEntity order = new OrderEntity();
+        order.setUserTrackingId(trackingId);
         order.setAddressLine1(orderRequest.getUserDeliveryAddress().getStreetAddress());
         order.setAddressLine2(orderRequest.getUserDeliveryAddress().getLandmark());
         order.setAddressType(orderRequest.getUserDeliveryAddress().getType());
@@ -34,13 +35,14 @@ public class OrderConvertor {
         order.setPostalCode("" + orderRequest.getUserDeliveryAddress().getPinCode());
         order.setUserId(orderRequest.getUserId());
         order.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-        List<OrderItemEntity> OrderItemDTOList = orderRequest.getData().stream().map(this::cartItemToOrderItemEntity).collect(Collectors.toList());
+        List<OrderItemEntity> OrderItemDTOList = orderRequest.getData().stream().map(i->cartItemToOrderItemEntity(i,trackingId)).collect(Collectors.toList());
         order.setOrderItems(OrderItemDTOList);
         return order;
     }
 
-    public OrderItemEntity cartItemToOrderItemEntity(CartItemsDTO dto) {
+    public OrderItemEntity cartItemToOrderItemEntity(CartItemsDTO dto,String trackingId) {
         OrderItemEntity item = new OrderItemEntity();
+        item.setUserTrackingId(trackingId);
         item.setVariantId(dto.getVariantId());
         item.setTitle(dto.getVariant().getTitle());
         item.setShortDescription(dto.getVariant().getShortDescription());

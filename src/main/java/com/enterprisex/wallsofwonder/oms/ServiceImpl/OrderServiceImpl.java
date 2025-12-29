@@ -102,13 +102,13 @@ public class OrderServiceImpl implements OrderService {
 //        }
 //        orderMeta = orderMetaRepository.save(orderMeta);
 
-        OrderEntity order = orderConvertor.buildOrderEntity(productRequests);
+        String trackingId =   generateTrackingId.generate(null, this);
+        OrderEntity order = orderConvertor.buildOrderEntity(productRequests,trackingId);
         order.setUserTrackingId(generateTrackingId.generate(null, this));
         order.setPaymentMode("UPI");
         order.setOrderDeliveredUserDate(new Timestamp(new Date().getTime() + 600000));
         OrderEntity savedOrder = orderRepository.save(order);
         for (OrderItemEntity orderItem : order.getOrderItems()) {
-            orderItem.setUserTrackingId(orderItem.getUserTrackingId());
             orderItem.setOrder(savedOrder);
         }
         List<ItemDataRequest> orderItems = new ArrayList<>();
