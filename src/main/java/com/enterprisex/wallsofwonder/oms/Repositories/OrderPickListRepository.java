@@ -31,8 +31,8 @@ public interface OrderPickListRepository extends JpaRepository<OrderItemsPickLis
             "        FROM oms.order_items_pick_list oipt " +
             "        JOIN catalog.product_variants pv  " +
             "            ON oipt.variant_id = pv.id " +
-            "        WHERE oipt.user_id = ?1 " +
-            "        AND (:status IS NULL OR oipt.status = ?2)";
+            "        WHERE oipt.user_id = ?1 ";
+//    +"        AND (:status IS NULL OR oipt.status = ?2)";
 
 
     @Query(value = ORDER_META_WITH_SKU , nativeQuery = true)

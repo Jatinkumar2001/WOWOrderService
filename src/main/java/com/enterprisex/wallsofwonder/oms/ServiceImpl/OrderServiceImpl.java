@@ -103,9 +103,10 @@ public class OrderServiceImpl implements OrderService {
 //        orderMeta = orderMetaRepository.save(orderMeta);
 
         String trackingId =   generateTrackingId.generate(null, this);
+        productRequests.setUserId(UserContext.getUser().getId());
         OrderEntity order = orderConvertor.buildOrderEntity(productRequests,trackingId);
-        order.setUserTrackingId(generateTrackingId.generate(null, this));
         order.setPaymentMode("UPI");
+        order.setPaymentMethod("Online");
         order.setOrderDeliveredUserDate(new Timestamp(new Date().getTime() + 600000));
         OrderEntity savedOrder = orderRepository.save(order);
         for (OrderItemEntity orderItem : order.getOrderItems()) {
@@ -172,7 +173,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItemsPickListEntity> orderPicklist = this.generatePicklist(order);
 
             order.setOrderStatus(OrderStatus.PICKLIST_GENERATED.name());
-            order = orderRepository.save(order);
+            orderPickListRepository.saveAll(orderPicklist);
 
             order = orderRepository.save(order);
             order.setOrderItems(null);

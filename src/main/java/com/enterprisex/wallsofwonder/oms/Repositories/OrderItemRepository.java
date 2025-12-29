@@ -28,7 +28,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, UUID
             "            SUM(oim.sale_price) AS total_price," +
             "            SUM(oim.quantity) AS total_quantity" +
             "        FROM oms.orders om" +
-            "        JOIN oms.order_items oim " +
+            "        LEFT JOIN oms.order_items oim " +
             "            ON om.user_tracking_id = oim.user_tracking_id" +
             "        WHERE om.user_id = ?1" +
             "        GROUP BY " +
