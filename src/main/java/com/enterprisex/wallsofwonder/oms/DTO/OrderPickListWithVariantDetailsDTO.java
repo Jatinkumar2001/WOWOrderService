@@ -14,7 +14,7 @@ public class OrderPickListWithVariantDetailsDTO {
     private UUID orderId;
 
 
-    private Long orderItemId;
+    private UUID orderItemId;
 
 
     private String orderSerialId;

@@ -11,7 +11,9 @@ import java.util.UUID;
 public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
     OrderEntity findByUserTrackingId(String userTrackingId);
 
-    @Query(value = "select * from oms.orders o where o.user_tracking_id in (:userTrackingId) and o.user_id in (:customerId)",nativeQuery = true)
-    List<OrderEntity> getOrderByCustomerIdAndUserTrackingId(@Param("userTrackingId") List<String> userTrackingId, @Param("customerId") List<Long> customerId);
-
+    @Query(value = "SELECT * FROM oms.orders o WHERE o.user_tracking_id IN (:trackingIds) AND o.user_id IN (:userIds)", nativeQuery = true)
+    List<OrderEntity> getOrderByCustomerIdAndUserTrackingId(
+            @Param("trackingIds") List<String> trackingIds,
+            @Param("userIds") List<Long> userIds
+    );
 }

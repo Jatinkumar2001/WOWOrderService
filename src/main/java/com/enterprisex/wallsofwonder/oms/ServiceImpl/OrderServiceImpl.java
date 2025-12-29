@@ -1,4 +1,5 @@
 package com.enterprisex.wallsofwonder.oms.ServiceImpl;
+
 import com.enterprisex.wallsofwonder.oms.Convertors.OrderConvertor;
 import com.enterprisex.wallsofwonder.oms.DTO.OrderDTO;
 import com.enterprisex.wallsofwonder.oms.DTO.OrderItemDTO;
@@ -20,6 +21,7 @@ import com.enterprisex.wallsofwonder.oms.Repositories.OrderPickListRepository;
 import com.enterprisex.wallsofwonder.oms.Repositories.OrderRepository;
 import com.enterprisex.wallsofwonder.oms.Service.OrderService;
 import com.enterprisex.wallsofwonder.oms.Service.StockMasterService;
+import com.enterprisex.wallsofwonder.oms.UserContext;
 import com.enterprisex.wallsofwonder.oms.Util.OrderTrackingIdGenerator;
 import com.enterprisex.wallsofwonder.oms.Util.PaginationUtil;
 import jakarta.transaction.Transactional;
@@ -101,11 +103,12 @@ public class OrderServiceImpl implements OrderService {
 //        orderMeta = orderMetaRepository.save(orderMeta);
 
         OrderEntity order = orderConvertor.buildOrderEntity(productRequests);
-        order.setUserTrackingId(generateTrackingId.generate(null,this));
+        order.setUserTrackingId(generateTrackingId.generate(null, this));
         order.setPaymentMode("UPI");
-        order.setOrderDeliveredUserDate(new Timestamp(new Date().getTime()+600000));
+        order.setOrderDeliveredUserDate(new Timestamp(new Date().getTime() + 600000));
         OrderEntity savedOrder = orderRepository.save(order);
         for (OrderItemEntity orderItem : order.getOrderItems()) {
+            orderItem.setUserTrackingId(orderItem.getUserTrackingId());
             orderItem.setOrder(savedOrder);
         }
         List<ItemDataRequest> orderItems = new ArrayList<>();
@@ -161,7 +164,7 @@ public class OrderServiceImpl implements OrderService {
 
 
         Optional<OrderEntity> optionalOrder = orderRepository.findById(UUID.fromString(orderId));
-        if(optionalOrder.isPresent()) {
+        if (optionalOrder.isPresent()) {
             OrderEntity order = optionalOrder.get();
             order.setOrderStatus(status.getCode());
             order = orderRepository.save(order);
@@ -185,87 +188,104 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PaginationResponseHandler getUserOrder(Long userId, Pageable pageable, String status) throws URISyntaxException {
+    public PaginationResponseHandler getUserOrder(Pageable pageable, String status) throws URISyntaxException {
+
         PaginationResponseHandler responseHandler = new PaginationResponseHandler();
-        Page<OrderWithItemsEntity> customerOrders = orderItemRepository.findByUserId(userId, pageable);
+        Long userId = UserContext.getUser().getId();
+        // 1️⃣ Fetch paginated orders
+        Page<OrderWithItemsEntity> ordersPage =
+                orderItemRepository.findByUserId(userId, pageable);
 
-
-//		List<OrderItemsPickList> orderItemsPickLists = orderItemsPickListRepository.findAll();
-        List<OrderPickListWithVariantDetailsEntity> orderItemsPickLists = orderPickListRepository.findByUserId(userId);
-//        List<OrderMetaWithSku> ordreMetaWithSku = customerOrders.stream().map(x -> mapper.map(x, OrderMetaWithSkuDto.class)).collect(Collectors.toList());
-//		List<PickListDto> pickListDtos = orderItemsPickLists.stream().map(x->mapper.map(x,PickListDto.class)).collect(Collectors.toList());
-        List<OrderPickListWithVariantDetailsDTO> pickListDtos = orderItemsPickLists.stream().map(x -> mapper.map(x, OrderPickListWithVariantDetailsDTO.class)).toList();
-
-        List<String> orderIds = customerOrders.stream().distinct().map(OrderWithItemsEntity::getUserTrackingId).collect(Collectors.toList());
-        if (orderIds.isEmpty()) {
-            orderIds.add("");
-        }
-        List<Long> customerIds = customerOrders.stream().distinct().map(OrderWithItemsEntity::getUserId).collect(Collectors.toList());
-        if (customerIds.isEmpty()) {
-            customerIds.add(0L);
+        if (ordersPage.isEmpty()) {
+            responseHandler.setData(List.of());
+            responseHandler.setTotalNumberOfElement(0);
+            responseHandler.setTotalNumberOfPages(0);
+            return responseHandler;
         }
 
-        List<OrderEntity> orders = orderRepository.getOrderByCustomerIdAndUserTrackingId(orderIds, customerIds);
-        List<OrderDTO> orderDtos = orders.stream().map(x -> mapper.map(x, OrderDTO.class)).toList();
+        // 2️⃣ Fetch pick list (already filtered in SQL)
+        List<OrderPickListWithVariantDetailsDTO> pickListDtos =
+                orderPickListRepository.findByUserId(userId,status)
+                        .stream()
+                        .map(e -> mapper.map(e, OrderPickListWithVariantDetailsDTO.class))
+                        .peek(p -> p.setStatus(getStatusForCustomer(p.getStatus())))
+                        .toList();
+
+        // 3️⃣ Build pick list map → orderId → items
+        Map<UUID, List<OrderPickListWithVariantDetailsDTO>> pickListByOrderId =
+                pickListDtos.stream()
+                        .collect(Collectors.groupingBy(
+                                OrderPickListWithVariantDetailsDTO::getOrderId
+                        ));
+
+        // 4️⃣ Extract trackingIds & userIds
+        List<String> trackingIds = ordersPage.stream()
+                .map(OrderWithItemsEntity::getUserTrackingId)
+                .distinct()
+                .toList();
+
+        List<Long> userIds = ordersPage.stream()
+                .map(OrderWithItemsEntity::getUserId)
+                .distinct()
+                .toList();
+
+        // 5️⃣ Fetch order master data
+        Map<String, OrderDTO> orderDtoMap =
+                orderRepository.getOrderByCustomerIdAndUserTrackingId(trackingIds, userIds)
+                        .stream()
+                        .map(o -> mapper.map(o, OrderDTO.class))
+                        .collect(Collectors.toMap(
+                                o -> o.getUserTrackingId() + "_" + o.getUserId(),
+                                o -> o
+                        ));
+
+        // 6️⃣ Build final response
         List<OrderWithItemsResponse> response = new ArrayList<>();
-        customerOrders.forEach(x -> {
-            if (status != null) {
-                List<OrderPickListWithVariantDetailsDTO> pickList = pickListDtos.stream().filter(p -> p.getOrderId().equals(x.getId())
-                                && (p.getStatus() != null && p.getStatus().equalsIgnoreCase(status)))
-                        .peek(s -> s.setStatus(getStatusForCustomer(s.getStatus())))
-//                        .peek(s -> s.setStatus(orderStatuses.stream().filter(o->o.getStatusName().equals(s.getStatus())).map(OrderStatuses::getCustomerStatus).findAny().get()))
-                        .collect(Collectors.toList());
-                if (!pickList.isEmpty()) {
-                    OrderWithItemsResponse dto = new OrderWithItemsResponse();
-                    List<Long> variantSkus = pickList.stream().filter(p -> p.getStatus().equals(OrderStatus.DELIVERED.name())).map(OrderPickListWithVariantDetailsDTO::getVariantSku).toList();
 
-                    Optional<OrderDTO> orderDtoOptional = orderDtos.stream().filter(o -> o.getUserTrackingId().equals(x.getUserTrackingId()) && Objects.equals(o.getUserId(), x.getUserId())).findFirst();
-                    if (orderDtoOptional.isPresent()) {
-                        OrderDTO orderDto = orderDtoOptional.get();
-                        dto.setOrder(orderDto);
-                    }
-                    dto.setId(x.getId());
-                    dto.setUserTrackingId(x.getUserTrackingId());
-                    dto.setCouponId(x.getCouponId());
-                    dto.setUserId(x.getUserId());
-                    dto.setCreatedAt(x.getCreatedAt());
-                    dto.setSkuItems(x.getItems());
-                    dto.setTotalPrice(x.getTotalPrice());
-                    dto.setTotalQuantity(x.getTotalQuantity());
-                    dto.setPickListItemsWithVariantDetails(pickList);
-                    response.add(dto);
-                }
-            } else {
-                List<OrderPickListWithVariantDetailsDTO> pickList = pickListDtos.stream()
-                        .filter(p -> Objects.equals(p.getOrderId(), x.getId()))
-                        .peek(s -> s.setStatus(getStatusForCustomer(s.getStatus())))
-//                        .peek(s -> s.setStatus(orderStatuses.stream().filter(o->o.getStatusName().equals(s.getStatus())).map(OrderStatuses::getCustomerStatus).findAny().get()))
-                        .collect(Collectors.toList());
-                OrderWithItemsResponse dto = new OrderWithItemsResponse();
-                Optional<OrderDTO> orderDtoOptional = orderDtos.stream().filter(o -> o.getUserTrackingId().equals(x.getUserTrackingId()) && Objects.equals(o.getUserId(), x.getUserId())).findFirst();
-                if (orderDtoOptional.isPresent()) {
-                    OrderDTO orderDto = orderDtoOptional.get();
-                    dto.setOrder(orderDto);
-                }
-                dto.setId(x.getId());
-                dto.setUserTrackingId(x.getUserTrackingId());
-                dto.setCouponId(x.getCouponId());
-                dto.setUserId(x.getUserId());
-                dto.setCreatedAt(x.getCreatedAt());
-                dto.setSkuItems(x.getItems());
-                dto.setTotalPrice(x.getTotalPrice());
-                dto.setTotalQuantity(x.getTotalQuantity());
-                dto.setPickListItemsWithVariantDetails(pickList);
-                response.add(dto);
+        for (
+                OrderWithItemsEntity entity : ordersPage) {
+
+            List<OrderPickListWithVariantDetailsDTO> pickList =
+                    pickListByOrderId.getOrDefault(entity.getId(), List.of());
+
+            if (status != null && pickList.isEmpty()) {
+                continue;
             }
-        });
 
-        responseHandler.setTotalNumberOfElement(customerOrders.getTotalElements());
-        responseHandler.setTotalNumberOfPages(customerOrders.getTotalPages());
+            OrderWithItemsResponse dto = new OrderWithItemsResponse();
+
+            dto.setOrder(
+                    orderDtoMap.get(
+                            entity.getUserTrackingId() + "_" + entity.getUserId()
+                    )
+            );
+
+            dto.setId(entity.getId());
+            dto.setUserTrackingId(entity.getUserTrackingId());
+            dto.setCouponId(entity.getCouponId());
+            dto.setUserId(entity.getUserId());
+            dto.setCreatedAt(entity.getCreatedAt());
+            dto.setSkuItems(entity.getItems());
+            dto.setTotalPrice(entity.getTotalPrice());
+            dto.setTotalQuantity(entity.getTotalQuantity());
+            dto.setPickListItemsWithVariantDetails(pickList);
+
+            response.add(dto);
+        }
+
+        // 7️⃣ Pagination metadata
         responseHandler.setData(response);
-        responseHandler.setNextPage(PaginationUtil.generatePaginationData(customerOrders, pageable.getPageNumber(), pageable.getPageSize()));
+        responseHandler.setTotalNumberOfElement(ordersPage.getTotalElements());
+        responseHandler.setTotalNumberOfPages(ordersPage.getTotalPages());
+        responseHandler.setNextPage(
+                PaginationUtil.generatePaginationData(
+                        ordersPage,
+                        pageable.getPageNumber(),
+                        pageable.getPageSize()
+                )
+        );
+
         return responseHandler;
-//		return customerOrders;
     }
 
     public List<OrderItemsPickListEntity> generatePicklist(OrderEntity order) {

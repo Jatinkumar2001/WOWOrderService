@@ -74,4 +74,5 @@ public class OrderItemEntity extends AbstractEntity implements Serializable{
     @Column(name = "attribute_6")
     private String attribute6;
 
+    private String userTrackingId;
 }

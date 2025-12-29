@@ -16,7 +16,7 @@ public interface OrderService {
     OrderDTO processOrder(String orderId, OrderStatus status);
 
 
-    PaginationResponseHandler getUserOrder(Long customerId, Pageable pageable, String status) throws URISyntaxException;
+    PaginationResponseHandler getUserOrder(Pageable pageable, String status) throws URISyntaxException;
 
 }
 

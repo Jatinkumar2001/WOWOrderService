@@ -98,8 +98,8 @@ public class OrderController {
 
     }
 
-    @GetMapping("getByUserId/{userId}")
-    public ResponseEntity<?> getCustomerOrder(@PathVariable Long userId, @RequestParam Map<String, String> currentPage) {
+    @GetMapping("/user")
+    public ResponseEntity<?> getCustomerOrder(@RequestParam Map<String, String> currentPage) {
 
         try {
             int pageNumber = currentPage.containsKey("page") ? Integer.parseInt(currentPage.get("page")) : 0;
@@ -109,7 +109,7 @@ public class OrderController {
             currentPageResponse.put("page", pageNumber);
             currentPageResponse.put("per_page", pageSize);
             Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("created_at").descending());
-            PaginationResponseHandler responseHandler = orderService.getUserOrder(userId, pageable, status);
+            PaginationResponseHandler responseHandler = orderService.getUserOrder(pageable, status);
             responseHandler.setMessage("Successfully retrieved data!");
             responseHandler.setSuccess(true);
             responseHandler.setCurrentPage(currentPageResponse);
