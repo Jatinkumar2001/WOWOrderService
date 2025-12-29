@@ -97,12 +97,21 @@ public class CartServiceImp implements CartService {
         return findCartItems();
     }
 
+
     @Override
     public List<CartItemsDTO> getAllCartByCustomer(Long customerId) {
         CartEntity cart = cartRepository.findByUserId(customerId);
         if (cart == null) return new ArrayList<>();
         List<CartItemWithProductEntity> cartItemResponse = cartItemRepository.findByCartId(cart.getId());
         return cartItemConverter.entityToDto(cartItemResponse);
+    }
+
+    @Override
+    public void deleteCart() {
+        CartEntity cart = cartRepository.findByUserId(UserContext.getUser().getId());
+        if(cart== null) throw new RuntimeException("Cart Not Found");
+        cart.setIsActive(false);
+        cartRepository.save(cart);
     }
 
 }

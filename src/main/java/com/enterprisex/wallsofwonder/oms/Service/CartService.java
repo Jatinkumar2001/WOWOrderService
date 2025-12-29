@@ -17,4 +17,6 @@ public interface CartService {
 
     List<CartItemsDTO> deleteItemCart(CartRequest body) throws Exception;
     List<CartItemsDTO> getAllCartByCustomer(Long userId);
+
+    void deleteCart();
 }

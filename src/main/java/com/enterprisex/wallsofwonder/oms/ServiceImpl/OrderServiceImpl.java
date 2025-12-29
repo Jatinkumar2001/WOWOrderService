@@ -19,6 +19,7 @@ import com.enterprisex.wallsofwonder.oms.Enums.ValidationStatus;
 import com.enterprisex.wallsofwonder.oms.Repositories.OrderItemRepository;
 import com.enterprisex.wallsofwonder.oms.Repositories.OrderPickListRepository;
 import com.enterprisex.wallsofwonder.oms.Repositories.OrderRepository;
+import com.enterprisex.wallsofwonder.oms.Service.CartService;
 import com.enterprisex.wallsofwonder.oms.Service.OrderService;
 import com.enterprisex.wallsofwonder.oms.Service.StockMasterService;
 import com.enterprisex.wallsofwonder.oms.UserContext;
@@ -64,6 +65,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderTrackingIdGenerator generateTrackingId;
+
+    @Autowired
+    private CartService cartService;
 
     @Transactional
     @Override
@@ -160,6 +164,7 @@ public class OrderServiceImpl implements OrderService {
         return response;
     }
 
+    @Transactional
     @Override
     public OrderDTO processOrder(String orderId, OrderStatus status) {
 
@@ -178,7 +183,7 @@ public class OrderServiceImpl implements OrderService {
             order = orderRepository.save(order);
             order.setOrderItems(null);
             OrderDTO response = mapper.map(order, OrderDTO.class);
-
+            cartService.deleteCart();
 
 //            if (order.getUserTrackingId() != null && response.getPaymentMode() != null) {
 //            new OrderSmsSender(order, orderMeta.getUserTrackingId(), response.getPaymentMode()).start();

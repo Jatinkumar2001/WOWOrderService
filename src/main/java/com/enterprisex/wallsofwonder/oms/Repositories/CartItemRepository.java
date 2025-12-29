@@ -17,7 +17,8 @@ public interface CartItemRepository extends JpaRepository<CartsItemsEntity, UUID
             "p.image,meta_title, meta_description, meta_keyword, p.main_category, " +
             "p.sub_category,pv.stock_status from oms.cart_items c " +
             "inner join catalog.product_variants pv on c.variant_id = pv.id  " +
-            "inner join catalog.products p on p.id = pv.product_id where c.cart_id = ?1";
+            "join oms.carts oc on oc.id =  c.cart_id "+
+            "inner join catalog.products p on p.id = pv.product_id where c.cart_id = ?1 and oc.is_active is true";
     @Query(value = GET_CART_ITEMS_WITH_VARIANTS,nativeQuery = true)
     List<CartItemWithProductEntity> findByCartId(UUID cartId);
 
