@@ -75,4 +75,5 @@ public class OrderItemEntity extends AbstractEntity implements Serializable{
     private String attribute6;
 
     private String userTrackingId;
+    private String name;
 }

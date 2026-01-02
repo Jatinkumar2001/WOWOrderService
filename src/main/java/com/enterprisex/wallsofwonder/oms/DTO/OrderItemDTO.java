@@ -1,5 +1,6 @@
 package com.enterprisex.wallsofwonder.oms.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.UUID;
@@ -8,7 +9,7 @@ import java.util.UUID;
 @Data
 public class OrderItemDTO {
 
-	private Long id;
+	private UUID id;
 	
     private Long variantId;
 
@@ -20,6 +21,8 @@ public class OrderItemDTO {
 
     private String  title;
 
+    @JsonProperty("salePrice")
     private Double billingPrice;
+    private String name;
 
 }
