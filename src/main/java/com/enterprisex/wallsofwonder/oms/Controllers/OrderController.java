@@ -124,4 +124,29 @@ public class OrderController {
         }
     }
 
+    @GetMapping("admin/getAll")
+    public ResponseEntity<?> getOrdersForAdmin(@RequestParam Map<String, String> currentPage) {
+
+        try {
+            int pageNumber = currentPage.containsKey("page") ? Integer.parseInt(currentPage.get("page")) : 0;
+            int pageSize = currentPage.containsKey("per_page") ? Integer.parseInt(currentPage.get("per_page")) : 10;
+            String status = currentPage.getOrDefault("status", null);
+            Map<String, Integer> currentPageResponse = new HashMap<>();
+            currentPageResponse.put("page", pageNumber);
+            currentPageResponse.put("per_page", pageSize);
+            Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("created_at").descending());
+            PaginationResponseHandler responseHandler = orderService.getOrdersForAdmin(pageable, status);
+            responseHandler.setMessage("Successfully retrieved data!");
+            responseHandler.setSuccess(true);
+            responseHandler.setCurrentPage(currentPageResponse);
+            return new ResponseEntity<>(responseHandler, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseHandler responseHandler = new ResponseHandler();
+            responseHandler.setMessage(e.getMessage());
+            responseHandler.setIsSuccess(false);
+            responseHandler.setData(null);
+            return new ResponseEntity<>(responseHandler, HttpStatus.OK);
+        }
+    }
 }

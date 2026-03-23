@@ -22,6 +22,10 @@ public class SecurityConfig {
 
     @Autowired
     private AuthTokenFilter filter;
+
+    public static final String [] PUBLIC_ENDPOINTS = {
+            "/order/*/*",
+    };
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {
         return builder.getAuthenticationManager();
@@ -30,6 +34,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
 
         http.cors(cors -> {}) .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

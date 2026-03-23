@@ -18,6 +18,7 @@ public interface OrderService {
 
     PaginationResponseHandler getUserOrder(Pageable pageable, String status) throws URISyntaxException;
 
+    PaginationResponseHandler getOrdersForAdmin(Pageable pageable, String status) throws URISyntaxException;
 }
 
 

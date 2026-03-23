@@ -1,6 +1,7 @@
 package com.enterprisex.wallsofwonder.oms.Repositories;
 
 import com.enterprisex.wallsofwonder.oms.Entities.OrderItemEntity;
+import com.enterprisex.wallsofwonder.oms.Entities.OrderItemWithUserDetail;
 import com.enterprisex.wallsofwonder.oms.Entities.OrderWithItemsEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,6 +60,9 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, UUID
 
     @Query(value = ORDER_META_WITH_SKU,countQuery =ORDER_META_WITH_SKU_COUNT , nativeQuery = true)
     Page<OrderWithItemsEntity> findByUserId(Long userId, Pageable pageable);
+
+    @Query(value = "select * from oms.order_items ",countQuery = "select count(*) from oms.order_items",nativeQuery = true)
+    Page<OrderItemWithUserDetail> findAllWithUser(Pageable pageable);
 
 //    @Query(value = ORDER_META_WITH_SKU_WITH_STORE,countQuery =ORDER_META_WITH_SKU_WITH_STORE_COUNT , nativeQuery = true)
 //    Page<OrderMetaWithSkuEntity> findByStoreId(Long storeId, Pageable pageable);

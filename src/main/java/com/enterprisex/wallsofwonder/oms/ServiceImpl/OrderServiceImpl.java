@@ -294,6 +294,25 @@ public class OrderServiceImpl implements OrderService {
         return responseHandler;
     }
 
+    @Override
+    public PaginationResponseHandler getOrdersForAdmin(Pageable pageable, String status) throws URISyntaxException {
+        PaginationResponseHandler responseHandler = new PaginationResponseHandler();
+
+        Page<OrderItemWithUserDetail> orderItems = orderItemRepository.findAllWithUser(pageable);
+        // 7️⃣ Pagination metadata
+        responseHandler.setData(orderItems.getContent());
+        responseHandler.setTotalNumberOfElement(orderItems.getTotalElements());
+        responseHandler.setTotalNumberOfPages(orderItems.getTotalPages());
+        responseHandler.setNextPage(
+                PaginationUtil.generatePaginationData(
+                        orderItems,
+                        pageable.getPageNumber(),
+                        pageable.getPageSize()
+                )
+        );
+        return responseHandler;
+    }
+
     public List<OrderItemsPickListEntity> generatePicklist(OrderEntity order) {
         List<OrderItemsPickListEntity> orderPicklist = new ArrayList<>();
         int lineIndex = 1;
